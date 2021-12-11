@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src='GameManager.js'></script>
+    <script src='maptile.js'></script>
+    <script src="player.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.2/dist/vue.js"></script>
+    <link href="TTT.css" rel="stylesheet"/>
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+          <!-- <div id="gamerankview"></div> -->
+            <!-- 
+                여기에 v-if와 else로 처음에 닉네임 2개 입력 받아서 2개의 데이터가 !null 때 v-if의 bool 값을 true로 바꿔줘서 게임 화면이 출력 되도록 그럼 Player 클래스가 하나 더 있어야 하나?  -- 했음
+                데이터 저장은 v-model로 해서 2개 저장하고 승패에 관한 값도 v-model로 총 3가지의 데이터를 저장하고 출력 해야 할 듯 -- 했음 승 패 무승부 까지 완료 또한 플레이어 이름까지 name으로 저장해서 반환 함
+                왜냐면 전적을 넣어줘야하니까 게임을 총 3판 진행 후 alert 창으로 전적 표시 해주고 아님 그냥 전적 버튼을 누르면 alert 창으로 닉네임 : 승 수 / 닉네임 : 승 수 이렇게 표시 해주는 방식으로 하면 될 듯 
+                -- 전적도 아래 출력되도록 컴퍼넌트화 해서 넣어줌 
+
+                massage라는 컴퍼넌트를 만들어서 이것처럼 출력 하는 방식으로 해야할 듯 위에다가 총 감싸는 div 하나 놓고 그 아래 gamestage라는 div 하나 더 만들어서 - ? 
+                v-if로 변경해 주면 될듯 처음 닉네임 입력 화면과 게임 화면 구분을 gamestage라고 만든 div와 닉네임 div 2개 만들어서 v-if로 출력 하면 될 듯 massage 출력할 div 하나 놓고 게임 화면이 들어갈 div 순서로 넣고
+                -- v-if로 닉네임 입력해야 게임 창이 나오도록 설계 완료
+                그리고 index 값이 
+                0 1 2
+                3 4 5
+                6 7 8 이니까
+                0 3 6 이 들어온다면 if 문으로 맨 아래 넣어주는 강제로 하노이탑에서 쓴 방식으로 넣어주고 0일때 강제로 넣고 아닐 때는 그 위에다가 올려두는 방식으로 하면 될듯
+                그리고 최종 승리는 어짜피 인덱스 값을 가지고 오기 때문에 그걸로 해도 될 꺼 같고 아님 stack1 2 3을 만들어서 그 아래에 div를 3개 씩 넣어서 따로 각자 배열로 저장해서 사용해도 될 듯
+                리셋은 생성자에 있는 친구 init을 실행해서 아예 배열을 초기화 하는 방식으로 하면 될 꺼 같고 이렇게만 하면 될 듯?
+
+
+                전체 스테이지 중 1 2 3 을 놓고
+                스테이지 1개당 들어갈 수 있는 영역 3개
+                GaemMap1, 2, 3에 value 값을 확인해서 O 라면 v-if로 true 만들어주고 아니면 false 만들어주고 하는걸 만들어서 해야하는건가 
+
+                // 이미지를 넣고 이미지 성공 
+                턴 마다 표시되는 별 성공
+
+
+                추가할 내용 
+                ---------------
+                하는데 플레이어 닉네임 입력 창을 그냥 하나의 공간에서 넣고 거기서 입력 받도록 하면 Vue를 하나만 쓰고 가능하도록? 닉네임 변경 버튼 추가 ++ && 닉네임이 변경되면 전적 초기화 했음 
+                닉네임이 변경 되더라도 전적은 그대로 < 성공 
+                전적 초기화 버튼 새로 만들기 < 성공 
+                랭킹 부분을 1. 플레이어 닉네임이 승리하였습니다 2. 플레이어 닉네임이 승리하였습니다 이런식으로 고쳐보기  랭킹 변경 ++ < 성공
+
+                
+            -->
+    <title>하이브리드 시험 - 거의 완성-img성공-팝업창 성공</title>
+
+</head>
+    <body class="bodys">
+        <div id="gamemain">
+
+            <div v-if="!isname" id="gameview">
+            <h3>하이브리드 앱 <br> 기말에 오신 걸 환영합니다.</h3>
+            <p>player1 : {{ texttest1 }}</p>
+            <input v-model="texttest1" placeholder="Player1의 닉네임"> 
+            <p>player2 : {{ texttest2 }}</p>
+            <input v-model="texttest2" placeholder="Player2의 닉네임">
+            <br><br>
+            <input type="button" value = "입력하세요" v-on:click = "inputtext">
+            </div>
+
+            <div v-else id="gameinfo3">
+                <p class="p1">Player1 Name : {{texttest1}}</p><p class="ps" v-if="getGameState() === 3 || getGameState() === 6">★</p>
+                <p class="p1">Player2 Name : {{texttest2}}</p><p class="ps" v-if="getGameState() === 4 || getGameState() === 7">★</p>
+                <input type="button" value="닉네임 변경" @click="reNickNames">
+                <input type="button" value="전적 초기화" @click="rePlayer">
+            </div>
+            
+        </div>
+
+        <div v-if="isgameview() == true" id="gameApp">
+
+            <div id="gametest">
+              <center><game-message v-if="GameClear() === true"></game-message></center>
+            </div>
+            <game-rank></game-rank>
+            
+            <div id="game-map" @click = "oxinput" >
+                <div 
+                    v-for = "(maptile, i) in GameMap"
+                    v-bind:class = "{ highlighted : maptile.isHighlighted }"
+
+                    class="game-map">
+                    <img v-if="maptile.isshow" class="imgview" :src="maptile.imglink" alt="">
+                    
+                
+                </div>
+            </div>
+            
+            <div id="gameinfo">
+                <center><input v-if="isgameover() == false" type="button" onclick="gms.init()" value = "다시 시작"></center>
+            </div>
+
+            <div class="background1">
+                <div class="window1">
+                  <div class="popup1">
+                      <div class="pupupview1">
+                      <center>
+                          <p>결과</p>
+                          <game-winner></game-winner>
+                          <game-player1></game-player1>
+                          <game-player2></game-player2>
+                          <input @click = "closepopup1" type="button" value="창 닫기">
+                      </center>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="background">
+                <div class="window">
+                  <div class="popup">
+                      <div class="pupupview">
+                      <center>
+                          <p>랭킹</p>
+                          <game-player1></game-player1>
+                          <game-player2></game-player2>
+                          <input @click = "closepopup" type="button" value="창 닫기">
+                      </center>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              
+        </div>
+
+       
+        
+        <script src="main.js"></script>
+        </script>
+    </body>
+</html>
